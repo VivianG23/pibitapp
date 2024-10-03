@@ -1,9 +1,12 @@
 import streamlit as st
 import json
 import os
-from trycourier import Courier 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import secrets
 import requests
+import bcrypt
 from bcrypt import gensalt
 import regex as re
 
@@ -114,16 +117,30 @@ def check_unique_usr(username_sign_up: str):
 
 def register_new_usr(name_sign_up: str, email_sign_up: str, username_sign_up: str, password_sign_up: str) -> None:
     """
-    Registra o novo usuário em um json
+    Registra o novo usuário em um JSON
     """
-    new_usr_data = {'username': username_sign_up, 'name': name_sign_up, 'email': email_sign_up, 'password': gensalt.hash(password_sign_up)}
+    # Gera o salt. O valor de rounds (custo) padrão é 12, mas você pode usar outro valor inteiro.
+    salt = bcrypt.gensalt()  # rounds padrão é 12
+    # Se você quiser um valor personalizado, passe um número, por exemplo: bcrypt.gensalt(rounds=10)
 
+    # Faz o hash da senha
+    hashed_password = bcrypt.hashpw(password_sign_up.encode('utf-8'), salt)
+    
+    new_usr_data = {
+        'username': username_sign_up,
+        'name': name_sign_up,
+        'email': email_sign_up,
+        'password': hashed_password.decode('utf-8')  # Converte de bytes para string para salvar no JSON
+    }
+
+    # Abrir o arquivo de autenticação para ler os dados existentes
     with open("_secret_auth_.json", "r") as auth_json:
         authorized_user_data = json.load(auth_json)
 
+    # Escrever o novo usuário no arquivo
     with open("_secret_auth_.json", "w") as auth_json_write:
         authorized_user_data.append(new_usr_data)
-        json.dump(authorized_user_data, auth_json_write)
+        json.dump(authorized_user_data, auth_json_write, indent=4)
 
 
 def check_username_exists(user_name: str) -> bool:
@@ -153,61 +170,4 @@ def check_email_exists(email_forgot_passwd: str):
             if user['email'] == email_forgot_passwd:
                     return True, user['username']
     return False, None
-
-
-def generate_random_passwd() -> str:
-    """
-    Gera uma senha aleatória
-    """
-    password_length = 10
-    return secrets.token_urlsafe(password_length)
-
-
-def send_passwd_in_email(auth_token: str, username_forgot_passwd: str, email_forgot_passwd: str, company_name: str, random_password: str) -> None:
-    """
-    Envia o email contendo uma senha aleatória
-    """
-    client = Courier(auth_token = auth_token)
-
-    resp = client.send_message(
-    message={
-        "to": {
-        "email": email_forgot_passwd
-        },
-        "content": {
-        "title": company_name + ": Login Password!",
-        "body": "Hi! " + username_forgot_passwd + "," + "\n" + "\n" + "Your temporary login password is: " + random_password  + "\n" + "\n" + "{{info}}"
-        },
-        "data":{
-        "info": "Please reset your password at the earliest for security reasons."
-        }
-    }
-    )
-
-
-def change_passwd(email_: str, random_password: str) -> None:
-    """
-    Troca a senha antiga pela nova
-    """
-    with open("_secret_auth_.json", "r") as auth_json:
-        authorized_users_data = json.load(auth_json)
-
-    with open("_secret_auth_.json", "w") as auth_json_:
-        for user in authorized_users_data:
-            if user['email'] == email_:
-                user['password'] = gensalt.hash(random_password)
-        json.dump(authorized_users_data, auth_json_)
     
-
-def check_current_passwd(email_reset_passwd: str, current_passwd: str) -> bool:
-    with open("_secret_auth_.json", "r") as auth_json:
-        authorized_users_data = json.load(auth_json)
-
-        for user in authorized_users_data:
-            if user['email'] == email_reset_passwd:
-                try:
-                    if gensalt.verify(user['password'], current_passwd) == True:
-                        return True
-                except:
-                    pass
-    return False
