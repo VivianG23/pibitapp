@@ -11,11 +11,7 @@ from utils import check_valid_email
 from utils import check_unique_email
 from utils import check_unique_usr
 from utils import register_new_usr
-
-smtp_server = "smtp.gmail.com"
-smtp_port = 587
-sender_email = "emiliano.dl@ufpi.edu.br"
-sender_password = "Bilada123"
+from utils import change_password
 
 
 class __login__:
@@ -25,17 +21,6 @@ class __login__:
 
     def __init__(self, company_name: str, width, height, logout_button_name: str = 'Logout', hide_menu_bool: bool = False, hide_footer_bool: bool = False, lottie_url: str = "https://assets8.lottiefiles.com/packages/lf20_ktwnwv5m.json"):
         """
-        Arguments:
-        -----------
-        1. self
-        2. auth_token : The unique authorization token received from - https://www.courier.com/email-api/
-        3. company_name : This is the name of the person/ organization which will send the password reset email.
-        4. width : Width of the animation on the login page.
-        5. height : Height of the animation on the login page.
-        6. logout_button_name : The logout button name.
-        7. hide_menu_bool : Pass True if the streamlit menu should be hidden.
-        8. hide_footer_bool : Pass True if the 'made with streamlit' footer should be hidden.
-        9. lottie_url : The lottie animation you would like to use on the login page. Explore animations at - https://lottiefiles.com/featured
         """
         self.company_name = company_name
         self.width = width
@@ -161,6 +146,9 @@ class __login__:
                                 register_new_usr(
                                     name_sign_up, email_sign_up, username_sign_up, password_sign_up)
                                 st.success("Registration Successful!")
+    
+    def change_pass_widget(self) -> None:
+        
 
 
     def logout_widget(self) -> None:
@@ -185,7 +173,7 @@ class __login__:
                 icons=['box-arrow-in-right', 'person-plus',
                        'x-circle', 'arrow-counterclockwise'],
                 options=['Login', 'Create Account',
-                         'Forgot Password?', 'Reset Password'],
+                         'Esqueceu a senha?'],
                 styles={
                     "container": {"padding": "5px"},
                     "nav-link": {"font-size": "14px", "text-align": "left", "margin": "0px"}})

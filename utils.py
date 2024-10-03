@@ -12,6 +12,9 @@ import regex as re
 
 encriptar = gensalt()
 
+import bcrypt
+import json
+
 def check_usr_pass(username: str, password: str) -> bool:
     """
     Autentica o usuário e a senha
@@ -22,12 +25,20 @@ def check_usr_pass(username: str, password: str) -> bool:
     for registered_user in authorized_user_data:
         if registered_user['username'] == username:
             try:
-                passwd_verification_bool = gensalt.verify(registered_user['password'], password)
-                if passwd_verification_bool == True:
+                # A senha no arquivo JSON está como string, então precisa ser convertida de volta para bytes
+                stored_hashed_password = registered_user['password'].encode('utf-8')
+
+                # A senha fornecida pelo usuário também precisa ser convertida em bytes
+                password_bytes = password.encode('utf-8')
+
+                # Agora verifica se a senha fornecida corresponde ao hash armazenado
+                if bcrypt.checkpw(password_bytes, stored_hashed_password):
                     return True
-            except:
+            except Exception as e:
+                print(f"Erro ao verificar a senha: {e}")
                 pass
     return False
+
 
 def load_lottieurl(url: str) -> str:
     """
@@ -170,4 +181,14 @@ def check_email_exists(email_forgot_passwd: str):
             if user['email'] == email_forgot_passwd:
                     return True, user['username']
     return False, None
+
+def change_password(user_name: str, new_password: str):
+    with open("_secret_auth_.json", "r") as auth_json:
+        authorized_users_data = json.load(auth_json)
+
+    with open("_secret_auth_.json", "w") as auth_json_:
+        for user in authorized_users_data:
+            if user['user_name'] == user_name:
+                user['password'] = bcrypt.checkpw(new_password)
+        json.dump(authorized_users_data, auth_json_)
     
