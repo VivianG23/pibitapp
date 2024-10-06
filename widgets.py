@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import bcrypt
 from streamlit_lottie import st_lottie
 from streamlit_option_menu import option_menu
 from streamlit_cookies_manager import EncryptedCookieManager
@@ -102,53 +103,61 @@ class __login__:
         st_lottie(lottie_json, width=self.width, height=self.height)
 
     def sign_up_widget(self) -> None:
-        with st.form("Sign Up Form"):
-            name_sign_up = st.text_input(
-                "Name *", placeholder='Please enter your name')
+        with st.form("Registre-se"):
+            name_sign_up = st.text_input("Name *", placeholder='Digite seu nome')
             valid_name_check = check_valid_name(name_sign_up)
 
-            email_sign_up = st.text_input(
-                "Email *", placeholder='Please enter your email')
+            email_sign_up = st.text_input("Email *", placeholder='Digite seu email')
             valid_email_check = check_valid_email(email_sign_up)
             unique_email_check = check_unique_email(email_sign_up)
 
-            username_sign_up = st.text_input(
-                "Username *", placeholder='Enter a unique username')
+            username_sign_up = st.text_input("Username *", placeholder='Digite um usuário')
             unique_username_check = check_unique_usr(username_sign_up)
 
-            password_sign_up = st.text_input(
-                "Password *", placeholder='Create a strong password', type='password')
+            password_sign_up = st.text_input("Password *", placeholder='Crie sua senha', type='password')
 
             st.markdown("###")
             sign_up_submit_button = st.form_submit_button(label='Register')
 
             if sign_up_submit_button:
-                if valid_name_check == False:
-                    st.error("Please enter a valid name!")
+                if not valid_name_check:
+                    st.error("Digite um nome válido")
 
-                elif valid_email_check == False:
-                    st.error("Please enter a valid Email!")
+                elif not valid_email_check:
+                    st.error("Digite um email válido")
 
-                elif unique_email_check == False:
-                    st.error("Email already exists!")
+                elif not unique_email_check:
+                    st.error("Já existe uma conta com esse email")
 
-                elif unique_username_check == False:
-                    st.error(
-                        f'Sorry, username {username_sign_up} already exists!')
+                elif not unique_username_check:
+                    st.error(f'O usuário {username_sign_up} já existe')
 
-                elif unique_username_check == None:
-                    st.error('Please enter a non - empty Username!')
+                elif unique_username_check is None:
+                    st.error('Digite um nome de usuário')
 
-                if valid_name_check == True:
-                    if valid_email_check == True:
-                        if unique_email_check == True:
-                            if unique_username_check == True:
-                                register_new_usr(
-                                    name_sign_up, email_sign_up, username_sign_up, password_sign_up)
-                                st.success("Registration Successful!")
-    
+                if valid_name_check and valid_email_check and unique_email_check and unique_username_check:
+                    register_new_usr(name_sign_up, email_sign_up, username_sign_up, password_sign_up)
+                    st.success("Registro realizado com sucesso!")
+
+
     def change_pass_widget(self) -> None:
-        
+        with st.form('Alterar senha'):
+            new_password= st.text_input('Nova senha', placeholder= 'Digite a nova senha', type='password')
+            confirm_new_password = st.text_input("Confirmar nova senha", placeholder='Diogite novamente a nova senha', type='password')
+            submit_button = st.form_submit_button(label='Mudar senha')
+
+            if submit_button:
+                if new_password != confirm_new_password:
+                    st.error('As senhas não são iguais')
+                    return
+
+                salt = bcrypt.gensalt()
+                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), salt)
+                
+                email = st.session_state['email']
+                self.change_passwd(email, hashed_new_password('utf-8'))
+
+
 
 
     def logout_widget(self) -> None:
@@ -172,7 +181,7 @@ class __login__:
                 menu_icon='list-columns-reverse',
                 icons=['box-arrow-in-right', 'person-plus',
                        'x-circle', 'arrow-counterclockwise'],
-                options=['Login', 'Create Account',
+                options=['Login', 'Criar uma conta',
                          'Esqueceu a senha?'],
                 styles={
                     "container": {"padding": "5px"},
@@ -213,9 +222,11 @@ class __login__:
                 if st.session_state['LOGGED_IN'] == False:
                     self.animation()
 
-        if selected_option == 'Create Account':
+        if selected_option == 'Criar uma conta':
             self.sign_up_widget()
-
+        
+        if selected_option == 'Esqueceu a senha?':
+            self.change_pass_widget()
 
         self.logout_widget()
 
