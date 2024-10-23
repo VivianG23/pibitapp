@@ -77,9 +77,9 @@ class __login__:
             del_login = st.empty()
             with del_login.form("Login Form"):
                 username = st.text_input(
-                    "Username", placeholder='Your unique username')
+                    "Usuário", placeholder='')
                 password = st.text_input(
-                    "Password", placeholder='Your password', type='password')
+                    "Senha", placeholder='', type='password')
 
                 st.markdown("###")
                 login_submit_button = st.form_submit_button(label='Login')
@@ -89,14 +89,13 @@ class __login__:
                         username, password)
 
                     if authenticate_user_check == False:
-                        st.error("Invalid Username or Password!")
+                        st.error("Usuário ou senha inválida")
 
                     else:
                         st.session_state['LOGGED_IN'] = True
                         self.cookies['__streamlit_login_signup_ui_username__'] = username
                         self.cookies.save()
                         del_login.empty()
-                        st.experimental_rerun()
 
     def animation(self) -> None:
         lottie_json = load_lottieurl(self.lottie_url)
@@ -104,20 +103,20 @@ class __login__:
 
     def sign_up_widget(self) -> None:
         with st.form("Registre-se"):
-            name_sign_up = st.text_input("Name *", placeholder='Digite seu nome')
+            name_sign_up = st.text_input("Nome *", placeholder='Digite seu nome')
             valid_name_check = check_valid_name(name_sign_up)
 
             email_sign_up = st.text_input("Email *", placeholder='Digite seu email')
             valid_email_check = check_valid_email(email_sign_up)
             unique_email_check = check_unique_email(email_sign_up)
 
-            username_sign_up = st.text_input("Username *", placeholder='Digite um usuário')
+            username_sign_up = st.text_input("Usuário *", placeholder='Digite um usuário')
             unique_username_check = check_unique_usr(username_sign_up)
 
-            password_sign_up = st.text_input("Password *", placeholder='Crie sua senha', type='password')
+            password_sign_up = st.text_input("Senha *", placeholder='Crie sua senha', type='password')
 
             st.markdown("###")
-            sign_up_submit_button = st.form_submit_button(label='Register')
+            sign_up_submit_button = st.form_submit_button(label='Registrar')
 
             if sign_up_submit_button:
                 if not valid_name_check:
@@ -171,7 +170,6 @@ class __login__:
                 st.session_state['LOGGED_IN'] = False
                 self.cookies['__streamlit_login_signup_ui_username__'] = '1c9a923f-fb21-4a91-b3f3-5f18e3f01182'
                 del_logout.empty()
-                st.experimental_rerun()
 
     def nav_sidebar(self):
         main_page_sidebar = st.sidebar.empty()
