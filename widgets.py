@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
+from datetime import datetime
 import bcrypt
 from streamlit_lottie import st_lottie
 from streamlit_option_menu import option_menu
@@ -21,8 +23,6 @@ class __login__:
     """
 
     def __init__(self, company_name: str, width, height, logout_button_name: str = 'Logout', hide_menu_bool: bool = False, hide_footer_bool: bool = False, lottie_url: str = "https://assets8.lottiefiles.com/packages/lf20_ktwnwv5m.json"):
-        """
-        """
         self.company_name = company_name
         self.width = width
         self.height = height
@@ -39,8 +39,6 @@ class __login__:
             st.stop()
 
     def check_auth_json_file_exists(self, auth_filename: str) -> bool:
-        """
-        """
         file_names = []
         for path in os.listdir('./'):
             if os.path.isfile(os.path.join('./', path)):
@@ -102,47 +100,59 @@ class __login__:
         st_lottie(lottie_json, width=self.width, height=self.height)
 
     def sign_up_widget(self) -> None:
-        with st.form("Registre-se"):
-            name_sign_up = st.text_input("Nome *", placeholder='Digite seu nome')
-            valid_name_check = check_valid_name(name_sign_up)
+      with st.form("Registre-se"):
+        name_sign_up = st.text_input("Nome *", placeholder='Digite seu nome')
+        valid_name_check = check_valid_name(name_sign_up)
 
-            email_sign_up = st.text_input("Email *", placeholder='Digite seu email')
-            valid_email_check = check_valid_email(email_sign_up)
-            unique_email_check = check_unique_email(email_sign_up)
+        email_sign_up = st.text_input(
+            "Email *", placeholder='Digite seu email')
+        valid_email_check = check_valid_email(email_sign_up)
+        unique_email_check = check_unique_email(email_sign_up)
 
-            username_sign_up = st.text_input("Usuário *", placeholder='Digite um usuário')
-            unique_username_check = check_unique_usr(username_sign_up)
+        username_sign_up = st.text_input(
+            "Usuário *", placeholder='Digite um usuário')
+        unique_username_check = check_unique_usr(username_sign_up)
 
-            password_sign_up = st.text_input("Senha *", placeholder='Crie sua senha', type='password')
+        password_sign_up = st.text_input(
+            "Senha *", placeholder='Crie sua senha', type='password')
 
-            st.markdown("###")
-            sign_up_submit_button = st.form_submit_button(label='Registrar')
+        matricula_sign_up = st.text_input(
+            "Matrícula *", placeholder='Digite a matrícula')
 
-            if sign_up_submit_button:
-                if not valid_name_check:
-                    st.error("Digite um nome válido")
+        st.markdown("###")
+        sign_up_submit_button = st.form_submit_button(label='Registrar')
 
-                elif not valid_email_check:
-                    st.error("Digite um email válido")
+        if sign_up_submit_button:
+            if not valid_name_check:
+                st.error("Digite um nome válido")
 
-                elif not unique_email_check:
-                    st.error("Já existe uma conta com esse email")
+            elif not valid_email_check:
+                st.error("Digite um email válido")
 
-                elif not unique_username_check:
-                    st.error(f'O usuário {username_sign_up} já existe')
+            elif not unique_email_check:
+                st.error("Já existe uma conta com esse email")
 
-                elif unique_username_check is None:
-                    st.error('Digite um nome de usuário')
+            elif not unique_username_check:
+                st.error(f'O usuário {username_sign_up} já existe')
 
-                if valid_name_check and valid_email_check and unique_email_check and unique_username_check:
-                    register_new_usr(name_sign_up, email_sign_up, username_sign_up, password_sign_up)
-                    st.success("Registro realizado com sucesso!")
+            elif unique_username_check is None:
+                st.error('Digite um nome de usuário')
 
+            if valid_name_check and valid_email_check and unique_email_check and unique_username_check:
+                # Adiciona a data de criação no momento do registro
+                created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                # Função de registro que agora também recebe matrícula e created_at
+                register_new_usr(name_sign_up, email_sign_up, username_sign_up,
+                                 password_sign_up, matricula_sign_up, created_at)
+                st.success("Registro realizado com sucesso!")
 
     def change_pass_widget(self) -> None:
         with st.form('Alterar senha'):
-            new_password= st.text_input('Nova senha', placeholder= 'Digite a nova senha', type='password')
-            confirm_new_password = st.text_input("Confirmar nova senha", placeholder='Diogite novamente a nova senha', type='password')
+            new_password = st.text_input(
+                'Nova senha', placeholder='Digite a nova senha', type='password')
+            confirm_new_password = st.text_input(
+                "Confirmar nova senha", placeholder='Digite novamente a nova senha', type='password')
             submit_button = st.form_submit_button(label='Mudar senha')
 
             if submit_button:
@@ -151,12 +161,43 @@ class __login__:
                     return
 
                 salt = bcrypt.gensalt()
-                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), salt)
-                
+                hashed_new_password = bcrypt.hashpw(
+                    new_password.encode('utf-8'), salt)
+
                 email = st.session_state['email']
                 self.change_passwd(email, hashed_new_password('utf-8'))
 
+    def register_sample_widget(self) -> None:
+        with st.form("Registrar Amostra"):
+            sample_id = st.text_input(
+                "ID da Amostra", placeholder='Digite o ID da amostra')
+            species = st.text_input("Espécie", placeholder='Digite a espécie')
+            location = st.text_input(
+                "Local de Coleta", placeholder='Digite o local de coleta')
+            submit_button = st.form_submit_button(label='Registrar Amostra')
 
+            if submit_button:
+                # Salvar os dados no banco ou arquivo
+                st.success(f"Amostra {sample_id} registrada com sucesso!")
+
+    def show_users_widget(self) -> None:
+    # Suponha que você tenha um arquivo JSON ou banco de dados onde os usuários estão armazenados
+      with open("_secret_auth_.json", "r") as f:
+        users_data = json.load(f)
+
+    # Verificando se todos os registros têm as chaves 'matricula' e 'created_at'
+      for user in users_data:
+        if 'matricula' not in user:
+            user['matricula'] = 'N/A'  # Valor padrão para usuários sem matrícula
+        if 'created_at' not in user:
+            user['created_at'] = 'N/A'  # Valor padrão para usuários sem data de criação
+
+    # Convertendo os dados para um DataFrame
+      users_df = pd.DataFrame(users_data)
+
+    # Exibindo a tabela com os usuários
+      st.title("Usuários Registrados")
+      st.table(users_df[['username', 'name', 'email', 'matricula', 'created_at']])  # Exibe todas as colunas relevantes
 
 
     def logout_widget(self) -> None:
@@ -177,10 +218,10 @@ class __login__:
             selected_option = option_menu(
                 menu_title='Navegação',
                 menu_icon='list-columns-reverse',
-                icons=['box-arrow-in-right', 'person-plus',
-                       'x-circle', 'arrow-counterclockwise'],
+                icons=['box-arrow-in-right', 'person-plus', 'x-circle',
+                       'arrow-counterclockwise', 'clipboard', 'file-plus'],
                 options=['Login', 'Criar uma conta',
-                         'Esqueceu a senha?'],
+                         'Esqueceu a senha?', 'Registrar Amostra', 'Usuários'],
                 styles={
                     "container": {"padding": "5px"},
                     "nav-link": {"font-size": "14px", "text-align": "left", "margin": "0px"}})
@@ -222,9 +263,15 @@ class __login__:
 
         if selected_option == 'Criar uma conta':
             self.sign_up_widget()
-        
+
         if selected_option == 'Esqueceu a senha?':
             self.change_pass_widget()
+
+        if selected_option == 'Registrar Amostra':
+            self.register_sample_widget()
+
+        if selected_option == 'Usuários':
+            self.show_users_widget()
 
         self.logout_widget()
 

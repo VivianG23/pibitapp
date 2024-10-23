@@ -126,7 +126,8 @@ def check_unique_usr(username_sign_up: str):
     return True
 
 
-def register_new_usr(name_sign_up: str, email_sign_up: str, username_sign_up: str, password_sign_up: str) -> None:
+def register_new_usr(name_sign_up, email_sign_up, username_sign_up, password_sign_up, matricula, created_at):
+
     """
     Registra o novo usuário em um JSON
     """
@@ -141,7 +142,9 @@ def register_new_usr(name_sign_up: str, email_sign_up: str, username_sign_up: st
         'username': username_sign_up,
         'name': name_sign_up,
         'email': email_sign_up,
-        'password': hashed_password.decode('utf-8')  # Converte de bytes para string para salvar no JSON
+        'password': hashed_password.decode('utf-8'),  # Converte de bytes para string para salvar no JSON
+        'matricula': matricula,
+        'created_at': created_at
     }
 
     # Abrir o arquivo de autenticação para ler os dados existentes
