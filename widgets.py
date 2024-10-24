@@ -275,8 +275,6 @@ class __login__:
 
         self.logout_widget()
 
-        if st.session_state['LOGGED_IN'] == True:
-            main_page_sidebar.empty()
 
         if self.hide_menu_bool == True:
             self.hide_menu()
