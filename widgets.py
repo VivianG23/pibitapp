@@ -12,6 +12,7 @@ from utils import load_lottieurl
 from utils import check_valid_name
 from utils import check_valid_email
 from utils import check_unique_email
+from crud import register_sample
 from utils import check_unique_usr
 from utils import register_new_usr
 from utils import change_password
@@ -167,18 +168,6 @@ class __login__:
                 email = st.session_state['email']
                 self.change_passwd(email, hashed_new_password('utf-8'))
 
-    def register_sample_widget(self) -> None:
-        with st.form("Registrar Amostra"):
-            sample_id = st.text_input(
-                "ID da Amostra", placeholder='Digite o ID da amostra')
-            species = st.text_input("Espécie", placeholder='Digite a espécie')
-            location = st.text_input(
-                "Local de Coleta", placeholder='Digite o local de coleta')
-            submit_button = st.form_submit_button(label='Registrar Amostra')
-
-            if submit_button:
-                # Salvar os dados no banco ou arquivo
-                st.success(f"Amostra {sample_id} registrada com sucesso!")
 
     def show_users_widget(self) -> None:
     # Suponha que você tenha um arquivo JSON ou banco de dados onde os usuários estão armazenados
@@ -220,12 +209,14 @@ class __login__:
                 menu_icon='list-columns-reverse',
                 icons=['box-arrow-in-right', 'person-plus', 'x-circle',
                        'arrow-counterclockwise', 'clipboard', 'file-plus'],
-                options=['Login', 'Criar uma conta',
+                options=['Autenticação', 'Criar uma conta',
                          'Esqueceu a senha?', 'Registrar Amostra', 'Usuários'],
                 styles={
                     "container": {"padding": "5px"},
                     "nav-link": {"font-size": "14px", "text-align": "left", "margin": "0px"}})
         return main_page_sidebar, selected_option
+    
+    
 
     def hide_menu(self) -> None:
         st.markdown(""" <style>
@@ -268,7 +259,7 @@ class __login__:
             self.change_pass_widget()
 
         if selected_option == 'Registrar Amostra':
-            self.register_sample_widget()
+            register_sample()
 
         if selected_option == 'Usuários':
             self.show_users_widget()
