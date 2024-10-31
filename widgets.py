@@ -12,7 +12,6 @@ from utils import load_lottieurl
 from utils import check_valid_name
 from utils import check_valid_email
 from utils import check_unique_email
-from crud import register_sample
 from utils import check_unique_usr
 from utils import register_new_usr
 from utils import change_password
@@ -208,9 +207,9 @@ class __login__:
                 menu_title='Navegação',
                 menu_icon='list-columns-reverse',
                 icons=['box-arrow-in-right', 'person-plus', 'x-circle',
-                       'arrow-counterclockwise', 'clipboard', 'file-plus'],
+                       'arrow-counterclockwise', 'file-plus'],
                 options=['Autenticação', 'Criar uma conta',
-                         'Esqueceu a senha?', 'Registrar Amostra', 'Usuários'],
+                         'Esqueceu a senha?', 'Usuários'],
                 styles={
                     "container": {"padding": "5px"},
                     "nav-link": {"font-size": "14px", "text-align": "left", "margin": "0px"}})
@@ -244,7 +243,7 @@ class __login__:
 
         main_page_sidebar, selected_option = self.nav_sidebar()
 
-        if selected_option == 'Login':
+        if selected_option == 'Autenticação':
             c1, c2 = st.columns([7, 3])
             with c1:
                 self.login_widget()
@@ -257,9 +256,6 @@ class __login__:
 
         if selected_option == 'Esqueceu a senha?':
             self.change_pass_widget()
-
-        if selected_option == 'Registrar Amostra':
-            register_sample()
 
         if selected_option == 'Usuários':
             self.show_users_widget()

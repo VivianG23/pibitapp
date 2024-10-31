@@ -19,9 +19,6 @@ if LOGGED_IN:
     # Armazenando o usuário no estado da sessão
     if 'username' not in st.session_state:
         st.session_state['username'] = username
-
-    # Mostrando as páginas do CRUD após login
-    st.write(f"Bem-vindo, {st.session_state['username']}! Escolha uma ação no menu à esquerda.")
     
 else:
     st.write("Por favor, faça login para acessar a aplicação.")
