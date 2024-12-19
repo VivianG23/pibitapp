@@ -116,8 +116,10 @@ class __login__:
         password_sign_up = st.text_input(
             "Senha *", placeholder='Crie sua senha', type='password')
 
-        matricula_sign_up = st.text_input(
-            "Matrícula *", placeholder='Digite a matrícula')
+        matricula_sign_up = st.selectbox(
+                    "Tipo de Usuário *", 
+                    ["Bolsista UFPI", "Bolsista Externo", "Mestrando", "Doutorando", "Professor"]
+                    )
 
         st.markdown("###")
         sign_up_submit_button = st.form_submit_button(label='Registrar')

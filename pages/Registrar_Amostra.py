@@ -2,7 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 
 # Verificação de login
-if not st.session_state.get("logged_in"):
+if not st.session_state.get("LOGGED_IN"):
     st.warning("Você precisa fazer login para acessar esta página.")
     st.stop()  # Interrompe a execução do restante da página se o usuário não estiver logado
 
@@ -56,11 +56,15 @@ with st.form("form_registro_amostra"):
     local_coleta = st.text_input("Local de Coleta")
     data_coleta = st.date_input("Data da Coleta")
     nome_coletor = st.text_input("Nome do Coletor")
-    metodo_coleta = st.text_input("Método de Coleta")
-    condicao_amostra = st.text_input("Condição da Amostra")
+    metodo_coleta = st.selectbox(
+    "Selecione o método de coleta:",  
+    ["Swab nasal", "Swab oral", "Swab cloacal", "Swab anal", "Sangue", "Sangue edta", "Sangue PBS", "Necrópsia"]
+)
+    condicao_amostra = st.selectbox(
+    "Selecione a condição da amostra:",
+    ["Temperatura ambiente", "Refrigerada", "Sem identificação", "Coagulada"]
+)
     destino_amostra = st.text_input("Destino da Amostra")
-    codigo_barras = st.text_input("Código de Barras")
-    identificacao_molecular = st.text_input("Identificação Molecular (opcional)")
     resultado_exame = st.text_input("Resultado do Exame (opcional)")
     observacoes = st.text_area("Observações (opcional)")
 
@@ -77,8 +81,6 @@ if submit_button:
         metodo_coleta=metodo_coleta,
         condicao_amostra=condicao_amostra,
         destino_amostra=destino_amostra,
-        codigo_barras=codigo_barras,
-        identificacao_molecular=identificacao_molecular,
         resultado_exame=resultado_exame,
         observacoes=observacoes
     )
