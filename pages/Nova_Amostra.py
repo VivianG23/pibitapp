@@ -66,6 +66,25 @@ with st.form("form_registro_amostra"):
         ["Temperatura ambiente", "Refrigerada", "Sem identificação", "Coagulada"]
     )
     destino_amostra = st.text_input("Destino da Amostra")
+
+    # Novos campos
+    sexo = st.selectbox(
+        "Sexo do Animal:",
+        ["", "Macho", "Fêmea", "Desconhecido"],
+        format_func=lambda x: x if x else "Selecione"
+    )
+    status = st.selectbox(
+        "Status do Animal:",
+        ["", "Vivo", "Morto", "Desconhecido"],
+        format_func=lambda x: x if x else "Selecione"
+    )
+    peso = st.number_input("Peso (em kg):", min_value=0.0, format="%.2f", step=0.01)
+    funcao = st.text_input("Função do Animal (opcional)", placeholder="Exemplo: Reprodutor, Acompanhante, etc.")
+
+    # Coordenadas
+    latitude = st.text_input("Latitude", placeholder="Exemplo: -23.550520")
+    longitude = st.text_input("Longitude", placeholder="Exemplo: -46.633308")
+
     resultado_exame = st.text_input("Resultado do Exame (opcional)")
     observacoes = st.text_area("Observações (opcional)")
 
@@ -84,6 +103,12 @@ if submit_button:
         "metodo_coleta": metodo_coleta,
         "condicao_amostra": condicao_amostra,
         "destino_amostra": destino_amostra,
+        "sexo": sexo,
+        "status": status,
+        "peso": peso,
+        "funcao": funcao,
+        "latitude": latitude,
+        "longitude": longitude,
         "resultado_exame": resultado_exame,
         "observacoes": observacoes
     }
