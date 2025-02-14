@@ -3,10 +3,11 @@ from pymongo import MongoClient
 
 # Conexão ao MongoDB
 def connect_to_mongo():
-    client = MongoClient("mongodb://localhost:27017/")  # Substitua pela URI do MongoDB
-    db = client['pibit_app']  # Substitua pelo nome do seu banco de dados
+    # Substitua <username>, <password> e, se necessário, o nome do cluster e banco de dados
+    uri = "mongodb+srv://emilianodl:icHkQo4W507qyMMf@cluster0.excq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    client = MongoClient(uri)
+    db = client['pibit_app']  # Ou já especificado na URI, se preferir.
     return db
-
 # Função para buscar sugestões do MongoDB
 def get_suggestions(field_name):
     db = connect_to_mongo()
