@@ -33,9 +33,6 @@ class __login__:
         self.hide_footer_bool = hide_footer_bool
 
 
-        if not self.cookies.ready():
-            st.stop()
-
     def check_auth_json_file_exists(self, auth_filename: str) -> bool:
         file_names = []
         for path in os.listdir('./'):
