@@ -5,10 +5,9 @@ import pandas as pd
 from datetime import datetime
 import bcrypt
 from utils import check_usr_pass
-from utils import load_lottieurl
+from streamlit_option_menu import option_menu
 from utils import check_valid_name
 from utils import check_valid_email
-from streamlit_lottie import option_menu
 from utils import check_unique_email
 from utils import check_unique_usr
 from utils import register_new_usr
@@ -25,14 +24,13 @@ class __login__:
     Builds the UI for the Login/ Sign Up page.
     """
 
-    def __init__(self, company_name: str, width, height, logout_button_name: str = 'Logout', hide_menu_bool: bool = False, hide_footer_bool: bool = False, lottie_url: str = "https://assets8.lottiefiles.com/packages/lf20_ktwnwv5m.json"):
+    def __init__(self, company_name: str, width, height, logout_button_name: str = 'Logout', hide_menu_bool: bool = False, hide_footer_bool: bool = False):
         self.company_name = company_name
         self.width = width
         self.height = height
         self.logout_button_name = logout_button_name
         self.hide_menu_bool = hide_menu_bool
         self.hide_footer_bool = hide_footer_bool
-        self.lottie_url = lottie_url
 
 
         if not self.cookies.ready():

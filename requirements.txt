@@ -3,4 +3,4 @@ trycourier
 regex 
 bcrypt
 pymongo
-streamlit_lottie
+streamlit_option_menu

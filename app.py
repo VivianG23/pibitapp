@@ -18,7 +18,6 @@ __login__obj = __login__(
     logout_button_name = 'Logout', 
     hide_menu_bool = False,
     hide_footer_bool = False,
-    lottie_url = 'https://lottie.host/955e400e-8241-40d5-88d5-7b24a65c0e2c/viy1vmGJhi.json'
 )
 
 # Construindo a interface de login
