@@ -8,6 +8,7 @@ from utils import check_usr_pass
 from utils import load_lottieurl
 from utils import check_valid_name
 from utils import check_valid_email
+from streamlit_lottie import option_menu
 from utils import check_unique_email
 from utils import check_unique_usr
 from utils import register_new_usr
@@ -94,9 +95,6 @@ class __login__:
                         self.cookies.save()
                         del_login.empty()
 
-    def animation(self) -> None:
-        lottie_json = load_lottieurl(self.lottie_url)
-        st_lottie(lottie_json, width=self.width, height=self.height)
 
     def sign_up_widget(self) -> None:
       with st.form("Registre-se"):
