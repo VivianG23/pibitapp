@@ -59,9 +59,6 @@ class __login__:
     def login_widget(self) -> None:
         if st.session_state['LOGGED_IN'] == False:
             if st.session_state['LOGOUT_BUTTON_HIT'] == False:
-                fetched_cookies = self.cookies
-                if '__streamlit_login_signup_ui_username__' in fetched_cookies.keys():
-                    if fetched_cookies['__streamlit_login_signup_ui_username__'] != '1c9a923f-fb21-4a91-b3f3-5f18e3f01182':
                         st.session_state['LOGGED_IN'] = True
 
         if st.session_state['LOGGED_IN'] == False:
