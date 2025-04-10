@@ -174,12 +174,8 @@ class __login__:
         main_page_sidebar, selected_option = self.nav_sidebar()
 
         if selected_option == 'Autenticação':
-            c1, c2 = st.columns([7, 3])
-            with c1:
-                self.login_widget()
-            with c2:
-                if not st.session_state['LOGGED_IN']:
-                    self.animation()
+           self.login_widget()
+
 
         if selected_option == 'Criar uma conta':
             self.sign_up_widget()
