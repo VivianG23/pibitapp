@@ -155,6 +155,10 @@ class __login__:
     def hide_footer(self) -> None:
         st.markdown(""" <style>footer {visibility: hidden;}</style> """, unsafe_allow_html=True)
 
+    def get_username(self):
+        return st.session_state.get('username', None)
+
+
     def build_login_ui(self):
         if 'LOGGED_IN' not in st.session_state:
             st.session_state['LOGGED_IN'] = False
