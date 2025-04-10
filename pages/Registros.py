@@ -19,6 +19,15 @@ def fetch_samples():
         sample['_id'] = str(sample['_id'])  # Converte ObjectId para string
     return samples
 
+# Função para buscar reagentes do banco de dados
+def fetch_reagents():
+    db = connect_to_mongo()
+    collection = db['reagentes']
+    reagents = list(collection.find())
+    for reagent in reagents:
+        reagent['_id'] = str(reagent['_id'])
+    return reagents
+
 # Função para filtrar pelo nome do animal
 def filter_by_animal_name(df, column_name='Nome do animal'):
     """
@@ -45,49 +54,48 @@ st.markdown(
 )
 
 # Página principal
-st.title("Amostras")
+st.title("Amostras e Reagentes")
 
-# Carrega as amostras e converte para DataFrame
-samples = fetch_samples()
-if samples:
-    df = pd.DataFrame(samples)
-else:
-    st.info("Nenhuma amostra registrada ainda.")
-    st.stop()
+# Cria abas para 'Registros', 'Relatório' e 'Reagentes'
+tabs = st.tabs(["Registros", "Relatório", "Reagentes"])
 
-# Cria abas para 'Registros' e 'Relatório'
-tabs = st.tabs(["Registros", "Relatório"])
-
+# Aba Amostras - Registros e Relatório
 with tabs[0]:
-    st.header("Lista de Registros")
-
+    st.header("Lista de Registros - Amostras")
+    samples = fetch_samples()
+    if samples:
+        df_samples = pd.DataFrame(samples)
+    else:
+        st.info("Nenhuma amostra registrada ainda.")
+        st.stop()
+    
     # --- Filtros na sidebar ---
-    st.sidebar.header("Filtros")
+    st.sidebar.header("Filtros para Amostras")
     
     # Filtro por Data de coleta (se existir a coluna)
-    if 'Data de coleta' in df.columns:
-        df['Data de coleta'] = pd.to_datetime(df['Data de coleta'], errors='coerce')
-        data_min = df['Data de coleta'].min()
-        data_max = df['Data de coleta'].max()
+    if 'Data de coleta' in df_samples.columns:
+        df_samples['Data de coleta'] = pd.to_datetime(df_samples['Data de coleta'], errors='coerce')
+        data_min = df_samples['Data de coleta'].min()
+        data_max = df_samples['Data de coleta'].max()
         data_selecionada = st.sidebar.date_input("Selecione o intervalo de datas:",
                                                   value=(data_min, data_max))
         if isinstance(data_selecionada, tuple) and len(data_selecionada) == 2:
             inicio, fim = data_selecionada
-            df = df[(df['Data de coleta'] >= pd.to_datetime(inicio)) & 
-                    (df['Data de coleta'] <= pd.to_datetime(fim))]
+            df_samples = df_samples[(df_samples['Data de coleta'] >= pd.to_datetime(inicio)) & 
+                                    (df_samples['Data de coleta'] <= pd.to_datetime(fim))]
     
-    # Filtro pelo Nome do animal
-    if 'Nome do animal' in df.columns:
-        df = filter_by_animal_name(df, 'Nome do animal')
+    # Filtro pelo Nome do animal (se existir)
+    if 'Nome do animal' in df_samples.columns:
+        df_samples = filter_by_animal_name(df_samples, 'Nome do animal')
     
     # Exibe a tabela filtrada
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df_samples, use_container_width=True)
     
     # Opção para exportar como CSV
-    csv = df.to_csv(index=False).encode('utf-8')
+    csv_samples = df_samples.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="Baixar como CSV",
-        data=csv,
+        label="Baixar Amostras como CSV",
+        data=csv_samples,
         file_name="amostras_registradas.csv",
         mime="text/csv"
     )
@@ -95,10 +103,10 @@ with tabs[0]:
 with tabs[1]:
     st.header("Relatório de Amostras")
     
-    # Exemplo de gráfico: distribuição das espécies (ou Nome do animal)
-    if 'Nome do animal' in df.columns:
-        # Cria uma contagem por espécie
-        especies = df['Nome do animal'].value_counts().reset_index()
+    # Exemplo de gráfico: distribuição das espécies ou Nome do animal
+    if 'Nome do animal' in df_samples.columns:
+        # Cria uma contagem por nome do animal
+        especies = df_samples['Nome do animal'].value_counts().reset_index()
         especies.columns = ['Nome do animal', 'Quantidade']
         
         # Gráfico de barras usando Altair
@@ -112,4 +120,24 @@ with tabs[1]:
             title="Distribuição de Espécies"
         )
         st.altair_chart(grafico, use_container_width=True)
-    
+    else:
+        st.info("Coluna 'Nome do animal' não encontrada para gerar o relatório.")
+
+# Aba Reagentes
+with tabs[2]:
+    st.header("Reagentes")
+    reagents = fetch_reagents()
+    if reagents:
+        df_reagents = pd.DataFrame(reagents)
+        st.dataframe(df_reagents, use_container_width=True)
+        
+        # Opção para exportar como CSV
+        csv_reagents = df_reagents.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Baixar Reagentes como CSV",
+            data=csv_reagents,
+            file_name="reagentes_registrados.csv",
+            mime="text/csv"
+        )
+    else:
+        st.info("Nenhum reagente registrado ainda.")

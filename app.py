@@ -2,6 +2,15 @@ import streamlit as st
 from pymongo import MongoClient
 from widgets import __login__
 
+st.markdown(
+    """
+    <h1 style='text-align: center; font-size: 32px; margin-top: 10px;'>
+        NEPPAS - Laboratório de Vigilância de Epizootias - UFPI
+    </h1>
+    """,
+    unsafe_allow_html=True
+)
+
 # Inicialização do objeto de login
 __login__obj = __login__(
     company_name = "UFPI",

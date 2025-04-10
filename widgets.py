@@ -15,7 +15,12 @@ from utils import check_unique_email
 from utils import check_unique_usr
 from utils import register_new_usr
 from utils import change_password
+from pymongo import MongoClient
 
+def connect_to_mongo():
+    uri = "mongodb+srv://emilianodl:icHkQo4W507qyMMf@cluster0.excq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    client = MongoClient(uri)
+    return client['pibit_app']
 
 class __login__:
     """
@@ -171,23 +176,22 @@ class __login__:
 
 
     def show_users_widget(self) -> None:
-    # Suponha que você tenha um arquivo JSON ou banco de dados onde os usuários estão armazenados
-      with open("_secret_auth_.json", "r") as f:
-        users_data = json.load(f)
+       db = connect_to_mongo()
+       users_collection = db["usuarios"]
+       users_data = list(users_collection.find({}, {"_id": 0}))  # Exclui o _id para não exibir
 
-    # Verificando se todos os registros têm as chaves 'matricula' e 'created_at'
-      for user in users_data:
-        if 'matricula' not in user:
-            user['matricula'] = 'N/A'  # Valor padrão para usuários sem matrícula
-        if 'created_at' not in user:
-            user['created_at'] = 'N/A'  # Valor padrão para usuários sem data de criação
+    # Garante que todos os registros tenham as chaves necessárias
+       for user in users_data:
+           user['matricula'] = user.get('matricula', 'N/A')
+           user['created_at'] = user.get('created_at', 'N/A')
 
-    # Convertendo os dados para um DataFrame
-      users_df = pd.DataFrame(users_data)
-
-    # Exibindo a tabela com os usuários
-      st.title("Usuários Registrados")
-      st.table(users_df[['username', 'name', 'email', 'matricula', 'created_at']])  # Exibe todas as colunas relevantes
+    # Converte para DataFrame e exibe
+       users_df = pd.DataFrame(users_data)
+       if not users_df.empty:
+           st.title("Usuários Registrados")
+           st.table(users_df[['username', 'name', 'email', 'matricula', 'created_at']])
+       else:
+           st.info("Nenhum usuário encontrado.")
 
 
     def logout_widget(self) -> None:
