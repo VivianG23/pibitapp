@@ -4,9 +4,6 @@ import os
 import pandas as pd
 from datetime import datetime
 import bcrypt
-from streamlit_lottie import st_lottie
-from streamlit_option_menu import option_menu
-from streamlit_cookies_manager import EncryptedCookieManager
 from utils import check_usr_pass
 from utils import load_lottieurl
 from utils import check_valid_name
@@ -36,9 +33,6 @@ class __login__:
         self.hide_footer_bool = hide_footer_bool
         self.lottie_url = lottie_url
 
-        self.cookies = EncryptedCookieManager(
-            prefix="streamlit_login_ui_yummy_cookies",
-            password='9d68d6f2-4258-45c9-96eb-2d6bc74ddbb5-d8f49cab-edbb-404a-94d0-b25b1d4a564b')
 
         if not self.cookies.ready():
             st.stop()
