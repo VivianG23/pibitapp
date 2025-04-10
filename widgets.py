@@ -31,6 +31,7 @@ class __login__:
         self.logout_button_name = logout_button_name
         self.hide_menu_bool = hide_menu_bool
         self.hide_footer_bool = hide_footer_bool
+    
 
 
     def check_auth_json_file_exists(self, auth_filename: str) -> bool:
