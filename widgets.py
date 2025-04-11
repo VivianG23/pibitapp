@@ -15,7 +15,7 @@ from utils import change_password
 from pymongo import MongoClient
 
 def connect_to_mongo():
-    uri = "mongodb+srv://emilianodl:icHkQo4W507qyMMf@cluster0.excq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    uri = os.getenv("MONGODB_URI")
     client = MongoClient(uri)
     return client['pibit_app']
 

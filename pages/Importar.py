@@ -1,9 +1,10 @@
 import streamlit as st
 from pymongo import MongoClient
+import os
 import pandas as pd
 
 # Conexão ao MongoDB
-uri = "mongodb+srv://emilianodl:icHkQo4W507qyMMf@cluster0.excq6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+uri = os.getenv("MONGODB_URI")
 client = MongoClient(uri)
 db = client['pibit_app']  # Ou já especificado na URI, se preferir.
 
