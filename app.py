@@ -26,11 +26,17 @@ LOGGED_IN = __login__obj.build_login_ui()
 username = __login__obj.get_username()
 
 def connect_to_mongo():
-    # Substitua <username>, <password> e, se necessário, o nome do cluster e banco de dados
-    uri = os.getenv("MONGODB_URI")
-    client = MongoClient(uri)
-    db = client['pibit_app']  # Ou já especificado na URI, se preferir.
-    return db
+    try:
+        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+        client.admin.command("ping")  # força a conexão
+        return client["pibit_app"]
+    except Exception as e:
+        st.error("Não foi possível conectar ao MongoDB Atlas:")
+        # exibe a mensagem real do erro
+        st.text(str(e))
+        # exibe o traceback completo
+        st.text(traceback.format_exc())
+        return None
 
 if LOGGED_IN:
     # Armazenando o usuário no estado da sessão
