@@ -6,191 +6,182 @@ from datetime import datetime
 import bcrypt
 from utils import check_usr_pass
 from streamlit_option_menu import option_menu
-from utils import check_valid_name
-from utils import check_valid_email
-from utils import check_unique_email
-from utils import check_unique_usr
-from utils import register_new_usr
-from utils import change_password
+from utils import (
+    check_valid_name,
+    check_valid_email,
+    check_unique_email,
+    check_unique_usr,
+    register_new_usr,
+    change_password,
+)
 from pymongo import MongoClient
 
 def connect_to_mongo():
-    uri = os.getenv("MONGODB_URI")
+    uri = ("mongodb+srv://emiliods79:uD5A2J4o38dpk0hX@cluster0.ufpae.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     client = MongoClient(uri)
-    return client['pibit_app']
+    db = client['pibit_app']  # Ou já especificado na URI, se preferir.
+    return db
 
 class __login__:
-    def __init__(self, company_name: str, width, height, logout_button_name: str = 'Logout', hide_menu_bool: bool = False, hide_footer_bool: bool = False):
+    def __init__(
+        self,
+        company_name: str,
+        width,
+        height,
+        logout_button_name: str = 'Logout',
+        hide_menu_bool: bool = False,
+        hide_footer_bool: bool = False
+    ):
         self.company_name = company_name
         self.width = width
         self.height = height
         self.logout_button_name = logout_button_name
         self.hide_menu_bool = hide_menu_bool
         self.hide_footer_bool = hide_footer_bool
+    
+    def get_username(self):
+        return st.session_state.get('username', None)
+
 
     def check_auth_json_file_exists(self, auth_filename: str) -> bool:
-        file_names = [path for path in os.listdir('./') if os.path.isfile(os.path.join('./', path))]
-        present_files = sorted([file_name for file_name in file_names if auth_filename in file_name])
-        return len(present_files) > 0
+        files = [
+            f for f in os.listdir('./')
+            if os.path.isfile(os.path.join('./', f))
+        ]
+        return any(auth_filename in f for f in files)
 
     def login_widget(self) -> None:
-        if st.session_state['LOGGED_IN'] == False:
-            if st.session_state['LOGOUT_BUTTON_HIT'] == False:
-                st.session_state['LOGGED_IN'] = True
+        if not st.session_state['LOGGED_IN']:
+            with st.form("login_form"):
+                username = st.text_input("Usuário")
+                password = st.text_input("Senha", type="password")
+                submitted = st.form_submit_button("Login")
 
-        if st.session_state['LOGGED_IN'] == False:
-            st.session_state['LOGOUT_BUTTON_HIT'] = False
-
-            del_login = st.empty()
-            with del_login.form("Login Form"):
-                username = st.text_input("Usuário", placeholder='')
-                password = st.text_input("Senha", placeholder='', type='password')
-
-                st.markdown("###")
-                login_submit_button = st.form_submit_button(label='Login')
-
-                if login_submit_button:
-                    authenticate_user_check = check_usr_pass(username, password)
-
-                    if authenticate_user_check == False:
+                if submitted:
+                    authenticated = check_usr_pass(username, password)
+                    if not authenticated:
                         st.error("Usuário ou senha inválida")
                     else:
                         st.session_state['LOGGED_IN'] = True
-                        del_login.empty()
+                        st.session_state['username'] = username
+                        st.rerun()
 
     def sign_up_widget(self) -> None:
-        with st.form("Registre-se"):
-            name_sign_up = st.text_input("Nome *", placeholder='Digite seu nome')
-            valid_name_check = check_valid_name(name_sign_up)
+        with st.form("register_form"):
+            username_sign_up = st.text_input("Usuário/Nome *", placeholder='Digite um usuário')
+            unique_username_check = check_unique_usr(username_sign_up)
 
             email_sign_up = st.text_input("Email *", placeholder='Digite seu email')
             valid_email_check = check_valid_email(email_sign_up)
             unique_email_check = check_unique_email(email_sign_up)
 
-            username_sign_up = st.text_input("Usuário *", placeholder='Digite um usuário')
-            unique_username_check = check_unique_usr(username_sign_up)
+            password_sign_up = st.text_input("Senha *", type='password')
+            matricula_sign_up = st.selectbox(
+                "Tipo de Usuário *",
+                ["Bolsista UFPI", "Bolsista Externo", "Mestrando", "Doutorando", "Professor"]
+            )
 
-            password_sign_up = st.text_input("Senha *", placeholder='Crie sua senha', type='password')
-
-            matricula_sign_up = st.selectbox("Tipo de Usuário *", ["Bolsista UFPI", "Bolsista Externo", "Mestrando", "Doutorando", "Professor"])
-
-            st.markdown("###")
-            sign_up_submit_button = st.form_submit_button(label='Registrar')
-
-            if sign_up_submit_button:
-                if not valid_name_check:
-                    st.error("Digite um nome válido")
-                elif not valid_email_check:
+            submitted = st.form_submit_button("Registrar")
+            if submitted:
+                if not valid_email_check:
                     st.error("Digite um email válido")
                 elif not unique_email_check:
                     st.error("Já existe uma conta com esse email")
                 elif not unique_username_check:
                     st.error(f'O usuário {username_sign_up} já existe')
-                elif unique_username_check is None:
-                    st.error('Digite um nome de usuário')
                 else:
                     created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    register_new_usr(name_sign_up, email_sign_up, username_sign_up, password_sign_up, matricula_sign_up, created_at)
+                    register_new_usr(
+                        email_sign_up,
+                        username_sign_up,
+                        password_sign_up,
+                        matricula_sign_up,
+                        created_at
+                    )
                     st.success("Registro realizado com sucesso!")
-
-    def change_pass_widget(self) -> None:
-        with st.form('Alterar senha'):
-            new_password = st.text_input('Nova senha', placeholder='Digite a nova senha', type='password')
-            confirm_new_password = st.text_input("Confirmar nova senha", placeholder='Digite novamente a nova senha', type='password')
-            submit_button = st.form_submit_button(label='Mudar senha')
-
-            if submit_button:
-                if new_password != confirm_new_password:
-                    st.error('As senhas não são iguais')
-                    return
-
-                salt = bcrypt.gensalt()
-                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), salt)
-
-                email = st.session_state['email']
-                self.change_passwd(email, hashed_new_password('utf-8'))
 
     def show_users_widget(self) -> None:
         db = connect_to_mongo()
-        users_collection = db["usuarios"]
-        users_data = list(users_collection.find({}, {"_id": 0}))
+        users = list(db["usuarios"].find({}, {"_id": 0}))
+        for u in users:
+            u['matricula'] = u.get('matricula', 'N/A')
+            u['created_at'] = u.get('created_at', 'N/A')
 
-        for user in users_data:
-            user['matricula'] = user.get('matricula', 'N/A')
-            user['created_at'] = user.get('created_at', 'N/A')
-
-        users_df = pd.DataFrame(users_data)
-        if not users_df.empty:
+        df = pd.DataFrame(users)
+        if not df.empty:
             st.title("Usuários Registrados")
-            st.table(users_df[['username', 'name', 'email', 'matricula', 'created_at']])
+            st.table(df[['username', 'name', 'email', 'matricula', 'created_at']])
         else:
             st.info("Nenhum usuário encontrado.")
 
     def logout_widget(self) -> None:
         if st.session_state['LOGGED_IN']:
-            del_logout = st.sidebar.empty()
-            del_logout.markdown("#")
-            logout_click_check = del_logout.button(self.logout_button_name)
-
-            if logout_click_check:
-                st.session_state['LOGOUT_BUTTON_HIT'] = True
+            if st.sidebar.button(self.logout_button_name):
                 st.session_state['LOGGED_IN'] = False
+                st.session_state['username'] = None
+                st.rerun()
 
     def nav_sidebar(self):
-        main_page_sidebar = st.sidebar.empty()
-        with main_page_sidebar:
-            selected_option = option_menu(
+        menu = st.sidebar.empty()
+        with menu:
+            selected = option_menu(
                 menu_title='Navegação',
                 menu_icon='list-columns-reverse',
-                icons=['box-arrow-in-right', 'person-plus', 'x-circle', 'arrow-counterclockwise', 'file-plus'],
-                options=['Autenticação', 'Criar uma conta', 'Esqueceu a senha?', 'Usuários'],
+                icons=[
+                    'box-arrow-in-right',
+                    'person-plus',
+                    'x-circle',
+                    'arrow-counterclockwise',
+                    'file-plus'
+                ],
+                options=[
+                    'Autenticação',
+                    'Criar uma conta',
+                    'Usuários'
+                ],
                 styles={
                     "container": {"padding": "5px"},
-                    "nav-link": {"font-size": "14px", "text-align": "left", "margin": "0px"}})
-        return main_page_sidebar, selected_option
+                    "nav-link": {
+                        "font-size": "14px",
+                        "text-align": "left",
+                        "margin": "0px"
+                    }
+                }
+            )
+        return menu, selected
 
     def hide_menu(self) -> None:
-        st.markdown(""" <style>#MainMenu {visibility: hidden;}</style> """, unsafe_allow_html=True)
+        st.markdown("""<style>#MainMenu{visibility:hidden;}</style>""", unsafe_allow_html=True)
 
     def hide_footer(self) -> None:
-        st.markdown(""" <style>footer {visibility: hidden;}</style> """, unsafe_allow_html=True)
-
-    def get_username(self):
-        return st.session_state.get('username', None)
-
+        st.markdown("""<style>footer{visibility:hidden;}</style>""", unsafe_allow_html=True)
 
     def build_login_ui(self):
-        if 'LOGGED_IN' not in st.session_state:
-            st.session_state['LOGGED_IN'] = False
+        # inicializa chaves de sessão
+        st.session_state.setdefault('LOGGED_IN', False)
+        st.session_state.setdefault('username', None)
 
-        if 'LOGOUT_BUTTON_HIT' not in st.session_state:
-            st.session_state['LOGOUT_BUTTON_HIT'] = False
+        # garante JSON de auth
+        if not self.check_auth_json_file_exists('secret_auth.json'):
+            with open("secret_auth.json", "w") as f:
+                json.dump([], f)
 
-        auth_json_exists_bool = self.check_auth_json_file_exists('_secret_auth_.json')
-        if not auth_json_exists_bool:
-            with open("_secret_auth_.json", "w") as auth_json:
-                json.dump([], auth_json)
+        _, selected = self.nav_sidebar()
 
-        main_page_sidebar, selected_option = self.nav_sidebar()
-
-        if selected_option == 'Autenticação':
-           self.login_widget()
-
-
-        if selected_option == 'Criar uma conta':
+        if selected == 'Autenticação':
+            self.login_widget()
+        elif selected == 'Criar uma conta':
             self.sign_up_widget()
-
-        if selected_option == 'Esqueceu a senha?':
-            self.change_pass_widget()
-
-        if selected_option == 'Usuários':
-            self.show_users_widget()
+        elif selected == 'Usuários':
+            if st.session_state['LOGGED_IN']:
+                self.show_users_widget()
+            else:
+                st.warning("Faça login para ver os usuários.")
 
         self.logout_widget()
 
         if self.hide_menu_bool:
             self.hide_menu()
-
         if self.hide_footer_bool:
             self.hide_footer()
 

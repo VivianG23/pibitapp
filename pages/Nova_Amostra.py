@@ -4,8 +4,7 @@ import os
 
 # Conexão ao MongoDB
 def connect_to_mongo():
-    # Substitua <username>, <password> e, se necessário, o nome do cluster e banco de dados
-    uri = os.getenv("MONGODB_URI")
+    uri = ("mongodb+srv://emiliods79:uD5A2J4o38dpk0hX@cluster0.ufpae.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     client = MongoClient(uri)
     db = client['pibit_app']  # Ou já especificado na URI, se preferir.
     return db

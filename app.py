@@ -1,6 +1,5 @@
 import streamlit as st
 from pymongo import MongoClient
-import os
 from widgets import __login__
 
 st.markdown(
@@ -26,17 +25,10 @@ LOGGED_IN = __login__obj.build_login_ui()
 username = __login__obj.get_username()
 
 def connect_to_mongo():
-    try:
-        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-        client.admin.command("ping")  # força a conexão
-        return client["pibit_app"]
-    except Exception as e:
-        st.error("Não foi possível conectar ao MongoDB Atlas:")
-        # exibe a mensagem real do erro
-        st.text(str(e))
-        # exibe o traceback completo
-        st.text(traceback.format_exc())
-        return None
+    uri = ("mongodb+srv://emiliods79:uD5A2J4o38dpk0hX@cluster0.ufpae.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    client = MongoClient(uri)
+    db = client['pibit_app']  # Ou já especificado na URI, se preferir.
+    return db
 
 if LOGGED_IN:
     # Armazenando o usuário no estado da sessão

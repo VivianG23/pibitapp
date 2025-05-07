@@ -4,9 +4,13 @@ import os
 import pandas as pd
 
 # Conexão ao MongoDB
-uri = os.getenv("MONGODB_URI")
-client = MongoClient(uri)
-db = client['pibit_app']  # Ou já especificado na URI, se preferir.
+def connect_to_mongo():
+    uri = ("mongodb+srv://emiliods79:uD5A2J4o38dpk0hX@cluster0.ufpae.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    client = MongoClient(uri)
+    db = client['pibit_app']  # Ou já especificado na URI, se preferir.
+    return db
+
+db = connect_to_mongo()
 
 st.title("Importação de Dados para MongoDB")
 
