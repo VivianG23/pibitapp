@@ -30,7 +30,7 @@ def fetch_reagents():
     return reagents
 
 # Função para filtrar pelo nome do animal
-def filter_by_animal_name(df, column_name='Nome do animal'):
+def filter_by_animal_name(df, column_name='NOME DO ANIMAL'):
     """
     Cria um campo de pesquisa na sidebar para filtrar a coluna 'Nome do animal'.
     Se nada for digitado, retorna o DataFrame original.
@@ -86,8 +86,8 @@ with tabs[0]:
                                     (df_samples['Data de coleta'] <= pd.to_datetime(fim))]
     
     # Filtro pelo Nome do animal (se existir)
-    if 'Nome do animal' in df_samples.columns:
-        df_samples = filter_by_animal_name(df_samples, 'Nome do animal')
+    if 'NOME DO ANIMAL' in df_samples.columns:
+        df_samples = filter_by_animal_name(df_samples, 'NOME DO ANIMAL')
     
     # Exibe a tabela filtrada
     st.dataframe(df_samples, use_container_width=True)
@@ -105,7 +105,7 @@ with tabs[1]:
     st.header("Relatório de Amostras")
     
     # Exemplo de gráfico: distribuição das espécies ou Nome do animal
-    if 'nome do animal' in df_samples.columns:
+    if 'NOME DO ANIMAL' in df_samples.columns:
         # Cria uma contagem por nome do animal
         especies = df_samples['NOME DO ANIMAL'].value_counts().reset_index()
         especies.columns = ['NOME DO ANIMAL', 'Quantidade']
