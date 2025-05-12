@@ -114,7 +114,7 @@ with tabs[1]:
         grafico = alt.Chart(especies).mark_bar().encode(
             x=alt.X("Nome do animal:N", sort='-y', title="Nome do animal"),
             y=alt.Y("Quantidade:Q", title="Quantidade"),
-            tooltip=["Nome do animal", "Quantidade"]
+            tooltip=["NOME DO ANIMAL", "Quantidade"]
         ).properties(
             width=600,
             height=400,
