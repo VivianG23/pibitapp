@@ -30,7 +30,7 @@ def fetch_reagents():
     return reagents
 
 # Função para filtrar pelo nome do animal
-def filter_by_animal_name(df, column_name='NOME DO ANIMAL'):
+def filter_by_animal_name(df, column_name='Nome comum'):
     """
     Cria um campo de pesquisa na sidebar para filtrar a coluna 'Nome do animal'.
     Se nada for digitado, retorna o DataFrame original.
@@ -86,8 +86,8 @@ with tabs[0]:
                                     (df_samples['Data de coleta'] <= pd.to_datetime(fim))]
     
     # Filtro pelo Nome do animal (se existir)
-    if 'NOME DO ANIMAL' in df_samples.columns:
-        df_samples = filter_by_animal_name(df_samples, 'NOME DO ANIMAL')
+    if 'Nome comum' in df_samples.columns:
+        df_samples = filter_by_animal_name(df_samples, 'Nome comum')
     
     # Exibe a tabela filtrada
     st.dataframe(df_samples, use_container_width=True)
@@ -105,16 +105,16 @@ with tabs[1]:
     st.header("Relatório de Amostras")
     
     # Exemplo de gráfico: distribuição das espécies ou Nome do animal
-    if 'NOME DO ANIMAL' in df_samples.columns:
+    if 'Nome comum' in df_samples.columns:
         # Cria uma contagem por nome do animal
-        especies = df_samples['NOME DO ANIMAL'].value_counts().reset_index()
-        especies.columns = ['NOME DO ANIMAL', 'Quantidade']
+        especies = df_samples['Nome comum'].value_counts().reset_index()
+        especies.columns = ['Nome comumL', 'Quantidade']
         
         # Gráfico de barras usando Altair
         grafico = alt.Chart(especies).mark_bar().encode(
             x=alt.X("Nome do animal:N", sort='-y', title="Nome do animal"),
             y=alt.Y("Quantidade:Q", title="Quantidade"),
-            tooltip=["NOME DO ANIMAL", "Quantidade"]
+            tooltip=["Nome comum", "Quantidade"]
         ).properties(
             width=600,
             height=400,
