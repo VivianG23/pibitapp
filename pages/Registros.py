@@ -105,7 +105,7 @@ with tabs[1]:
     st.header("Relatório de Amostras")
     
     # Exemplo de gráfico: distribuição das espécies ou Nome do animal
-    if 'NOME DO ANIMAL' in df_samples.columns:
+    if 'nome do animal' in df_samples.columns:
         # Cria uma contagem por nome do animal
         especies = df_samples['NOME DO ANIMAL'].value_counts().reset_index()
         especies.columns = ['NOME DO ANIMAL', 'Quantidade']
