@@ -97,7 +97,7 @@ if submit_button:
     collection = db['amostras']
     sample_data = {
         "especie": especie_input,  # Usa o valor digitado ou a sugestão selecionada
-        "nome_comum": nome_comum_input,  # Usa o valor digitado ou a sugestão selecionada
+        "nome comum": nome_comum_input,  # Usa o valor digitado ou a sugestão selecionada
         "local_coleta": local_coleta,
         "data_coleta": str(data_coleta),
         "nome_coletor": nome_coletor,

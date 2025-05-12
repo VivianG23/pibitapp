@@ -31,10 +31,6 @@ def fetch_reagents():
 
 # Função para filtrar pelo nome do animal
 def filter_by_animal_name(df, column_name='Nome comum'):
-    """
-    Cria um campo de pesquisa na sidebar para filtrar a coluna 'Nome do animal'.
-    Se nada for digitado, retorna o DataFrame original.
-    """
     pesquisa = st.sidebar.text_input("Pesquisar pelo nome do animal:")
     if pesquisa:
         df = df[df[column_name].str.contains(pesquisa, case=False, na=False)]
@@ -108,11 +104,11 @@ with tabs[1]:
     if 'Nome comum' in df_samples.columns:
         # Cria uma contagem por nome do animal
         especies = df_samples['Nome comum'].value_counts().reset_index()
-        especies.columns = ['Nome comumL', 'Quantidade']
+        especies.columns = ['Nome comum', 'Quantidade']
         
         # Gráfico de barras usando Altair
         grafico = alt.Chart(especies).mark_bar().encode(
-            x=alt.X("Nome do animal:N", sort='-y', title="Nome do animal"),
+            x=alt.X("Nome comum:N", sort='-y', title="Nome comum"),
             y=alt.Y("Quantidade:Q", title="Quantidade"),
             tooltip=["Nome comum", "Quantidade"]
         ).properties(

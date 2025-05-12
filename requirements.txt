@@ -3,6 +3,7 @@ trycourier
 regex 
 bcrypt
 datetime
+bson
 openpyxl
 pymongo
 streamlit_option_menu

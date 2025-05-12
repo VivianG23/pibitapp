@@ -1,5 +1,6 @@
 import streamlit as st
 from pymongo import MongoClient
+from bson import ObjectId
 import os
 import pandas as pd
 
@@ -12,60 +13,95 @@ def connect_to_mongo():
 
 # Conecta ao banco e seleciona a coleção de amostras
 db = connect_to_mongo()
-collection = db['amostras']
+samples_col = db['amostras']
+exams_col   = db['exames']
 
 st.title("Editar Amostra")
 
-# Busca todas as amostras e cria um dicionário para facilitar a seleção
-samples = list(collection.find())
-sample_dict = {sample['_id']: sample for sample in samples}
+# Carrega amostras
+samples = list(samples_col.find())
+# Mapeia ID (string) → documento
+sample_dict = { str(s['_id']): s for s in samples }
+sample_ids  = list(sample_dict.keys())
 
-if not sample_dict:
+if not sample_ids:
     st.info("Nenhuma amostra cadastrada para editar.")
     st.stop()
 
-# Seleção da amostra (usando o _id, mas pode ser outro identificador)
-sample_ids = list(sample_dict.keys())
+# Carrega exames e debuga
+exams = list(exams_col.find())
+st.write("⚙️ Exames carregados do Banco:", exams)
+
+# Mapeia nome do exame → ID (string)
+# ajuste o campo 'nome' se seu documento usar outro
+exam_map = { e['nome']: str(e['_id']) for e in exams if 'nome' in e }
+
+# Se não houver exames no banco, avisar
+if not exam_map:
+    st.warning("Não há exames cadastrados — você poderá adicionar novos abaixo.")
+
+# Seleção de amostra
 sample_id = st.selectbox("Selecione a amostra para editar:", options=sample_ids)
+sample = sample_dict[sample_id]
 
-if sample_id:
-    # Recupera a amostra selecionada
-    sample = sample_dict[sample_id]
+st.subheader("Dados atuais da Amostra")
+st.json(sample)
 
-    st.subheader("Dados atuais da Amostra")
-    st.write(sample)  # Exibe os dados atuais para conferência
+st.subheader("Editar dados da Amostra")
+with st.form("form_editar_amostra"):
+    update_data = {}
 
-    st.subheader("Editar dados da Amostra")
-    with st.form("form_editar_amostra"):
-        update_data = {}
+    # Exemplo de edição de status
+    status_atual = sample.get("status", "Pendente")
+    opcoes_status = ["Pendente", "Transferida", "Recebida"]
+    idx = opcoes_status.index(status_atual) if status_atual in opcoes_status else 0
+    novo_status = st.selectbox("Status", options=opcoes_status, index=idx)
+    update_data["status"] = novo_status
 
-        # Sempre exibe o campo Status (pode ser adaptado conforme necessário)
-        status_atual = sample.get("status", "Pendente")
-        opcoes_status = ["Pendente", "Transferida", "Recebida"]
-        # Caso o status atual não esteja entre as opções, define o primeiro como padrão
-        indice_status = opcoes_status.index(status_atual) if status_atual in opcoes_status else 0
-        novo_status = st.selectbox("Status", options=opcoes_status, index=indice_status)
-        update_data["status"] = novo_status
+    # Exemplo de edição de laboratório
+    lab_atual = sample.get("laboratorio", "")
+    if pd.notna(lab_atual):
+        novo_lab = st.text_input("Laboratório", value=lab_atual)
+        update_data["laboratorio"] = novo_lab
 
-        # Exibe o campo Laboratório somente se o valor atual não for NaN
-        laboratorio_valor = sample.get("laboratorio", "")
-        if pd.notna(laboratorio_valor):
-            novo_laboratorio = st.text_input("Laboratório", value=laboratorio_valor)
-            update_data["laboratorio"] = novo_laboratorio
+    # Exemplo de edição de observações
+    obs_atual = sample.get("observacoes", "")
+    if pd.notna(obs_atual):
+        nova_obs = st.text_area("Observações", value=obs_atual)
+        update_data["observacoes"] = nova_obs
 
-        # Você pode adicionar outros campos, condicionando sua exibição
-        # Exemplo para um campo "Observacoes"
-        observacoes_valor = sample.get("observacoes", "")
-        if pd.notna(observacoes_valor):
-            nova_observacao = st.text_area("Observações", value=observacoes_valor)
-            update_data["observacoes"] = nova_observacao
+    # --- Multiselect para exames já existentes ---
+    # converte lista de ObjectId ou strings para nomes
+    atuais = sample.get("exames", [])
+    atuais_nomes = [
+        nome for nome, _id in exam_map.items()
+        if str(_id) in [str(x) for x in atuais]
+    ]
+    selecionados = st.multiselect(
+        "Exames associados (existentes)",
+        options=list(exam_map.keys()),
+        default=atuais_nomes
+    )
 
-        submit = st.form_submit_button("Salvar alterações")
+    # --- Text input para criar novo exame ---
+    novo_exame = st.text_input("Adicionar novo exame (opcional)")
+    if novo_exame:
+        # insere no Mongo e atualiza o map
+        novo_id = exams_col.insert_one({"nome": novo_exame}).inserted_id
+        exam_map[novo_exame] = str(novo_id)
+        selecionados.append(novo_exame)
+        st.success(f"Exame '{novo_exame}' criado e adicionado à lista.")
 
-        if submit:
-            # Atualiza a amostra no MongoDB (filtrando pelo _id)
-            result = collection.update_one({"_id": sample['_id']}, {"$set": update_data})
-            if result.modified_count:
-                st.success("Amostra atualizada com sucesso!")
-            else:
-                st.warning("Nenhuma alteração realizada ou ocorreu um problema na atualização.")
+    # Converte nomes selecionados de volta para ObjectId
+    update_data["exames"] = [ ObjectId(exam_map[n]) for n in selecionados ]
+
+    submit = st.form_submit_button("Salvar alterações")
+    if submit:
+        result = samples_col.update_one(
+            { "_id": ObjectId(sample_id) },
+            { "$set": update_data }
+        )
+        if result.modified_count:
+            st.success("Amostra atualizada com sucesso!")
+        else:
+            st.warning("Nenhuma alteração detectada ou erro na atualização.")
