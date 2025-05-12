@@ -1,5 +1,6 @@
 import streamlit as st
 from pymongo import MongoClient
+import datetime
 import os
 import pandas as pd
 
@@ -10,38 +11,50 @@ def connect_to_mongo():
     db = client['pibit_app']  # Ou já especificado na URI, se preferir.
     return db
 
+
 db = connect_to_mongo()
 
 st.title("Importação de Dados para MongoDB")
 
 # Seleção do tipo de planilha para definir a coleção
-tipo_planilha = st.radio("Selecione o tipo de planilha a ser importada:", options=["Amostras", "Reagentes"])
+tipo_planilha = st.radio(
+    "Selecione o tipo de planilha a ser importada:",
+    options=["Amostras", "Reagentes"]
+)
 
-if tipo_planilha == "Amostras":
-    collection = db["amostras"]
-else:
-    collection = db["reagentes"]
+collection = db["amostras"] if tipo_planilha == "Amostras" else db["reagentes"]
 
-# Componente para upload do arquivo
-uploaded_file = st.file_uploader("Selecione uma planilha (CSV ou Excel)", type=["csv", "xlsx"])
+# Upload do arquivo
+uploaded_file = st.file_uploader(
+    "Selecione uma planilha (CSV ou Excel)",
+    type=["csv", "xlsx"]
+)
 
 if uploaded_file is not None:
     try:
-        # Verifica o tipo de arquivo e lê com o Pandas
+        # Leitura com pandas
         if uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file)
+            df = pd.read_csv(uploaded_file, parse_dates=['Data de Coleta'])
         else:
-            df = pd.read_excel(uploaded_file)
+            df = pd.read_excel(uploaded_file, parse_dates=['Data de Coleta'])
         
+        # 1) Converter coluna 'Hora' (datetime.time) para string ISO:
+        if 'Hora' in df.columns:
+            df['Hora'] = df['Hora'].apply(
+                lambda x: x.isoformat() if isinstance(x, datetime.time) else x
+            )
+
         st.subheader("Visualização dos Dados")
         st.dataframe(df.head())
 
-        # Botão para iniciar a importação
         if st.button("Importar dados"):
-            # Converte o DataFrame em uma lista de dicionários
+            # transformar em lista de dicts e inserir
             dados = df.to_dict(orient="records")
             resultado = collection.insert_many(dados)
-            st.success(f"Foram inseridos {len(resultado.inserted_ids)} documentos na coleção '{tipo_planilha}' do MongoDB!")
-            
+            st.success(
+                f"Foram inseridos {len(resultado.inserted_ids)} "
+                f"documentos na coleção '{tipo_planilha}'!"
+            )
+
     except Exception as e:
         st.error(f"Ocorreu um erro ao importar os dados: {e}")
